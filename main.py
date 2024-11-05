@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # Leitura e conversão da imagem
-imagem = cv2.imread('samples/incendio4.png')
+imagem = cv2.imread('fire_dataset/fire_images/fire.1.png')
 imagem_rgb = cv2.cvtColor(imagem, cv2.COLOR_BGR2RGB)  # Conversão para RGB
 imagem_suave = cv2.GaussianBlur(imagem_rgb, (5, 5), 0)  # Aplicação de GaussianBlur para suavizar
 
@@ -13,7 +13,7 @@ imagem_hsv = cv2.cvtColor(imagem_suave, cv2.COLOR_RGB2HSV)
 
 # Intervalos de cor HSV para detecção de fogo
 lower_fire = np.array([0, 100, 150])  # Ajustar o valor conforme necessário
-upper_fire = np.array([10, 245, 255])
+upper_fire = np.array([15, 245, 255])
 
 # Criação da máscara de detecção de fogo
 mascara_fogo = cv2.inRange(imagem_hsv, lower_fire, upper_fire)
@@ -41,11 +41,15 @@ for contour in contours:
         if len(approx) > 4:
             x, y, w, h = cv2.boundingRect(contour)
             #cv2.rectangle(imagem, (x, y), (x + w, y + h), (0, 254, 0), 2)  # Cor verde
-            cv2.drawContours(imagem, [contour], -1, (0, 254, 0), 2)
+            cv2.drawContours(imagem, [contour], -1, (0, 255, 0), 2)
+
+         # Verificação de convexidade e bordas irregulares
+        #if len(approx) > 4 and not cv2.isContourConvex(approx):
+        #    cv2.drawContours(imagem, [contour], -1, (0, 255, 0), 2)  # Desenha contorno em verde
 
 # Exibição das imagens
 cv2.imshow('Imagem Original', imagem)
-cv2.imshow('Focos de incêndio', result)
+cv2.imshow('Focos de incendio', result)
 
 # Salvar o resultado final com os focos de incêndio detectados
 cv2.imwrite('focos_detectados.jpg', imagem)
