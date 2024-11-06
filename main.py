@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # Leitura e conversão da imagem
-imagem = cv2.imread('fire_dataset/fire_images/fire.1.png')
+imagem = cv2.imread('fire_dataset/non_fire_images/non_fire.205.png')
 imagem_rgb = cv2.cvtColor(imagem, cv2.COLOR_BGR2RGB)  # Conversão para RGB
 imagem_suave = cv2.GaussianBlur(imagem_rgb, (5, 5), 0)  # Aplicação de GaussianBlur para suavizar
 
