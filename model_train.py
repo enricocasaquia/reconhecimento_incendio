@@ -83,36 +83,55 @@ def predict_image(model, img_path):
     img_array = tf.keras.utils.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     prediction = model.predict(img_array)
-    if prediction[0] > 0.25:
-        print("Fogo detectado na imagem -", prediction)
-    else:
+
+    if prediction[0] > 0.1:
         print("Nenhum foco de fogo detectado -", prediction)
+        return False
+
+    print("Fogo detectado na imagem -", prediction)
+    return True
 
 def main():
-    model = build_model()
-    
+    # escolha = input("Você vai criar um modelo novo ou usar um existente? (0/1): ")
+    escolha = 1
+    if escolha == 0:
+        model = build_model()
+        train_data, val_data = load_data()
+
+        # Treinamento do modelo
+        history = model.fit(
+            train_data,
+            validation_data=val_data,
+            epochs=2
+        )
+
+        model.save("modelo.keras")
+    else:
+        model = tf.keras.models.load_model("modelo.keras")
+        
     # Resumo do modelo
     model.summary()
-
-    train_data, val_data = load_data()
-    
-    # Treinamento do modelo
-    history = model.fit(
-        train_data,
-        validation_data=val_data,
-        epochs=2
-    )
     
     # Plotar o histórico de treinamento
-    plot_training_history(history)
+    # plot_training_history(history)
     
     # Avaliar o modelo com dados de validação
-    evaluate_model(model, val_data)
+    # evaluate_model(model, val_data)
     
     # Testar uma imagem individual (modifique o caminho para a imagem)
     for i in range(1,10):
         img_path = 'fire_dataset/fire_images/fire.'+str(i)+'.png'
-        predict_image(model, img_path)
+        if predict_image(model, img_path):
+            print("Teste da imagem com fogo número " + str(i) + ' deu certo')
+        else:
+            print("Teste da imagem com fogo número " + str(i) + ' deu errado')
+
+    for i in range(1,10):
+        img_path = 'fire_dataset/non_fire_images/non_fire.'+str(i)+'.png'
+        if predict_image(model, img_path):
+            print("Teste da imagem sem fogo número " + str(i) + ' deu errado')
+        else:
+            print("Teste da imagem sem fogo número " + str(i) + ' deu certo')
 
 if __name__ == '__main__':
     main()
