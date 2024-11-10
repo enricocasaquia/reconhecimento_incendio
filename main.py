@@ -1,58 +1,25 @@
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+from tools.FireImageOutliner import FireImageOutliner
+from tools.FireDetection import FireDetection
 
+def main():
+    fireDetection: FireDetection = FireDetection()
 
-# Leitura e conversão da imagem
-imagem = cv2.imread('fire_dataset/non_fire_images/non_fire.205.png')
-imagem_rgb = cv2.cvtColor(imagem, cv2.COLOR_BGR2RGB)  # Conversão para RGB
-imagem_suave = cv2.GaussianBlur(imagem_rgb, (5, 5), 0)  # Aplicação de GaussianBlur para suavizar
+    # fireDetection.initialize_model("models/modelo_deteccao_fogo", "dataset/fire_dataset", 16)
+    fireDetection.load_model("models/modelo_deteccao_fogo")
 
-# Conversão para HSV
-imagem_hsv = cv2.cvtColor(imagem_suave, cv2.COLOR_RGB2HSV)
+    fireDetection.get_model_summary()
 
-# Intervalos de cor HSV para detecção de fogo
-lower_fire = np.array([0, 100, 150])  # Ajustar o valor conforme necessário
-upper_fire = np.array([15, 245, 255])
+    for i in range(5,15):
+        img_path = 'dataset/fire_dataset/fire/'+str(i)+'.jpg'
+        fireDetection.test_if_image_has_fire(img_path)
 
-# Criação da máscara de detecção de fogo
-mascara_fogo = cv2.inRange(imagem_hsv, lower_fire, upper_fire)
+    for i in range(1,11):
+        img_path = 'dataset/fire_dataset/not_fire/'+str(i)+'.jpg'
+        fireDetection.test_if_image_has_fire(img_path)
 
-# Aplicação de operações morfológicas para remover ruídos e preencher áreas
-kernel = np.ones((10, 10), np.uint8)
-mascara_fogo = cv2.morphologyEx(mascara_fogo, cv2.MORPH_CLOSE, kernel)
-mascara_fogo = cv2.morphologyEx(mascara_fogo, cv2.MORPH_OPEN, kernel)
+    image: FireImageOutliner = FireImageOutliner("dataset/fire_dataset/fire/6.jpg")
+    print(image.check_if_has_fire())
+    image.show()
 
-# Resultado da aplicação da máscara na imagem original
-result = cv2.bitwise_and(imagem, imagem, mask=mascara_fogo)
-
-# Detecção de contornos
-contours, _ = cv2.findContours(mascara_fogo, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-# Desenho de retângulos ao redor dos focos detectados
-for contour in contours:
-    area = cv2.contourArea(contour)
-    if 0 < area < 999999:  # Definindo limites de área mínima e máxima
-        # Aproximação do contorno para verificar irregularidade
-        perimetro = cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, 0.02 * perimetro, True)
-
-        # Verifica se o contorno é "irregular" (mais de 4 vértices)
-        if len(approx) > 4:
-            x, y, w, h = cv2.boundingRect(contour)
-            #cv2.rectangle(imagem, (x, y), (x + w, y + h), (0, 254, 0), 2)  # Cor verde
-            cv2.drawContours(imagem, [contour], -1, (0, 255, 0), 2)
-
-         # Verificação de convexidade e bordas irregulares
-        #if len(approx) > 4 and not cv2.isContourConvex(approx):
-        #    cv2.drawContours(imagem, [contour], -1, (0, 255, 0), 2)  # Desenha contorno em verde
-
-# Exibição das imagens
-cv2.imshow('Imagem Original', imagem)
-cv2.imshow('Focos de incendio', result)
-
-# Salvar o resultado final com os focos de incêndio detectados
-cv2.imwrite('focos_detectados.jpg', imagem)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    main()
