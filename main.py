@@ -29,7 +29,7 @@ def process_directory(fire_detection: FireDetection) -> None:
             print(f"\nTestando imagem: {img_path}")
             fire_detection.test_if_image_has_fire(img_path)
 
-def outline_image():
+def outline_image(fire_detection: FireDetection) -> None:
     """Exibe as outlines de uma imagem específica para verificar detecção de fogo."""
 
     img: str = get_input("Digite o caminho, nome e extensão do arquivo de imagem: ")
@@ -37,7 +37,9 @@ def outline_image():
     print(f"A imagem tem outlines detectadas: {image.check_if_has_fire()}")
     image.show()
 
-def loaded_model_loop(fire_detection: FireDetection):
+    loaded_model_loop(fire_detection)
+
+def loaded_model_loop(fire_detection: FireDetection) -> None:
     """Loop principal para testar imagens ou diretórios e exibir outlines."""
 
     test_option: str = get_input(
@@ -55,11 +57,11 @@ def loaded_model_loop(fire_detection: FireDetection):
 
     outline_option: str = get_input('Deseja olhar as outlines de uma imagem? Digite "y" para sim, qualquer outra coisa para sair: ')
     if outline_option == "y":
-        outline_image()
+        outline_image(fire_detection)
     else:
         exit()
 
-def main():
+def main() -> None:
     fire_detection: FireDetection = FireDetection()
 
     option: str = get_input('Digite "criar" para criar novo modelo, ou "carregar" pra carregar um já existente: ')
